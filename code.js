@@ -1,1 +1,2 @@
-    var x, dx, y;
+    const v; // Скорость змейки
+    var x, dx, y ; 
