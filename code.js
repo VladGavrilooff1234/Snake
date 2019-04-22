@@ -4,8 +4,10 @@ const HEIGHT_CANVAS = 400;
 const SNAKE_CELL_WIDTH = 20;
 const SNAKE_LENGTH = 5;
 
-var snake = [],
-  apple = [];
+var apples = [];
+
+//TODO: put all classes to new files
+//TODO: write a function inside of the Snake class that will return true if there are 2 points with the same coordinates or false otherwise;
 
 function Point(x, y) {
   this.x = x;
@@ -20,7 +22,13 @@ function Point(x, y) {
   } else if (y < 0) {
     this.y = y + HEIGHT_CANVAS;
   }
+  this.equals = function(point) {
+    return this.x == point.x && this.y == point.y;
+  };
 }
+Point.prototype.write = function() {
+  console.log("great!");
+};
 function Direction(key, x, y) {
   switch (key) {
     case "ArrowUp":
@@ -36,29 +44,37 @@ function Direction(key, x, y) {
   }
 }
 
-function Apple(apple) {
-  this.x = getRandom(0, WIDTH_CANVAS);
-  this.y = getRandom(0, HEIGHT_CANVAS);
+function Apple() {
+  let x = getRandom(0, WIDTH_CANVAS);
+  let y = getRandom(0, HEIGHT_CANVAS);
+  this.coordinate = new Point(x, y);
+
   this.draw = function(ctx) {
     ctx.fillStyle = "red";
-    ctx.fillRect(this.x, this.y, SNAKE_CELL_WIDTH, SNAKE_CELL_WIDTH);
+    ctx.fillRect(
+      this.coordinate.x,
+      this.coordinate.y,
+      SNAKE_CELL_WIDTH,
+      SNAKE_CELL_WIDTH
+    );
   };
-  apple.push(this.x, this.y);
 }
 function getRandom(min, max) {
-  return Math.random() * (max - min) + min;
+  let result = Math.round(Math.random() * (max - min) + min);
+  let reminder = result % SNAKE_CELL_WIDTH;
+  return result - reminder;
 }
 // x - number; это начальное положение змейки по x. x >= 0 and x <= WIDTH_CANVAS
 // y - number; это начальное положение змейки по y, y >=0 and y <= HEIGHT_CANVAS
 // direction - string; главное направление движения всей змейки
 
-function Snake(x, y, direction, snake) {
+function Snake(x, y) {
   this.data = [];
-  this.length = 5;
+  this.length = SNAKE_LENGTH;
   this.direction = direction;
   // изменяем координаты змейки
-  this.currentPoint = new Point(10, 10);
-  this.move = function() {
+  this.currentPoint = new Point(0, 0);
+  this.move = function(apple) {
     while (this.data.length <= this.length) {
       this.currentPoint = Direction(
         currentDirection,
@@ -66,14 +82,18 @@ function Snake(x, y, direction, snake) {
         this.currentPoint.y
       );
       this.data.push(this.currentPoint);
-      snake.push(this.currentPoint);
     }
     this.data.shift();
-    snake.shift();
-    if (SnakeEatApples(x, y, SNAKE_CELL_WIDTH, SNAKE_LENGTH, SPEED) == true) {
+  };
+  this.collide = function(apple) {
+    if (this.data[this.data.length - 1].equals(apple.coordinate)) {
       this.length++;
+      return true;
+    } else {
+      return false;
     }
   };
+
   // отображает змейку в canvas
   this.draw = function(ctx) {
     this.data.forEach(point => {
@@ -96,32 +116,25 @@ function Snake(x, y, direction, snake) {
 }
 function Game(canvasId) {
   let sn1 = new Snake(WIDTH_CANVAS / 2, HEIGHT_CANVAS / 2);
+
   let apple = new Apple();
+  apples.push(apple);
+
   (function(apple) {
     setInterval(function() {
       var canvas = document.getElementById("canvas");
       var ctx = canvas.getContext("2d");
       ctx.fillStyle = "black";
       ctx.fillRect(0, 0, 800, 800);
-      sn1.move();
+      sn1.move(apple);
+      if (sn1.collide(apple)) {
+        apple = new Apple();
+        apple.coordinate.write();
+      }
       sn1.draw(ctx);
       apple.draw(ctx);
     }, 100);
   })(apple);
-}
-
-function SnakeEatApples(snake, apple, SNAKE_CELL_WIDTH, SNAKE_LENGTH, SPEED) {
-  this.data = [];
-
-  while (SNAKE_LENGTH >= 5) {
-    if (snake[0] == apple[0] && snake[1] == apple[0]) {
-      snake.push(apple);
-      SNAKE_LENGTH++;
-      return true;
-    } else {
-      return false;
-    }
-  }
 }
 
 function rand(min, max) {
