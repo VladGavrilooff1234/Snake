@@ -4,8 +4,6 @@ const HEIGHT_CANVAS = 400;
 const SNAKE_CELL_WIDTH = 20;
 const SNAKE_LENGTH = 5;
 
-var apples = [];
-
 //TODO: put all classes to new files
 //TODO: write a function inside of the Snake class that will return true if there are 2 points with the same coordinates or false otherwise;
 
@@ -118,7 +116,6 @@ function Game(canvasId) {
   let sn1 = new Snake(WIDTH_CANVAS / 2, HEIGHT_CANVAS / 2);
 
   let apple = new Apple();
-  apples.push(apple);
 
   (function(apple) {
     setInterval(function() {
